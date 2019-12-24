@@ -1,31 +1,28 @@
 package com.yorkismine.newslist;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.yorkismine.newslist.parser.CsvParser;
+import com.yorkismine.newslist.parser.Parser;
 
-import java.sql.Time;
+import java.io.File;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
@@ -38,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     Retrofit retrofit;
     NewsAdapter adapter;
+    Parser parser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         Gson gson = new GsonBuilder().setLenient().create();
+        parser = new CsvParser();
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -64,14 +63,21 @@ public class MainActivity extends AppCompatActivity {
 
         String key = "9145ee20b660406e9eea321aa4a0ee6c";
 
-        callEndpoints();
+
+        try {
+            callEndpoints();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressLint("CheckResult")
-    private void callEndpoints() {
+    private void callEndpoints() throws Exception{
         NewsApi newsApi = retrofit.create(NewsApi.class);
+        Single<List<Article>> observable = Observable.fromIterable(parser.parse(new File(getExternalCacheDir(), "news.csv"))).toList();
 
-        Observable<Article> usa = newsApi.getNewsUSA()
+
+        Observable<Article> usa = newsApi.getNewsUSA().delay(5, TimeUnit.SECONDS)
                 .doOnNext(newsObject ->{
                     int i = 0;
                     for (Article article : newsObject.getArticles()){
@@ -87,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                     return art;
                 });
 
-        Observable<Article> ru = newsApi.getNewsRu()
+        Observable<Article> ru = newsApi.getNewsRu().delay(2, TimeUnit.SECONDS)
                 .doOnNext(newsObject ->{
                     int i = 0;
                     for (Article article : newsObject.getArticles()){
@@ -102,8 +108,7 @@ public class MainActivity extends AppCompatActivity {
                     art.setTitle("RU " + art.getTitle());
                     return art;
                 });
-
-        Observable.merge(usa, ru)
+        Observable.merge(ru, usa)
                 .filter(new Predicate<Article>() {
                     @Override
                     public boolean test(Article article) throws Exception {
@@ -119,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .toList()
+                .mergeWith(observable)
                 .subscribe(this::handleResults, this::handleError);
 
 
@@ -137,4 +143,5 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "ERROR IN FETCHING API RESPONSE. Try again",
                 Toast.LENGTH_LONG).show();
     }
+
 }
