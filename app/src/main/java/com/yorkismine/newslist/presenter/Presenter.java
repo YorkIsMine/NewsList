@@ -1,5 +1,7 @@
 package com.yorkismine.newslist.presenter;
 
-public interface Presenter {
+import java.io.Serializable;
+
+public interface Presenter extends Serializable {
     void callEndpoints() throws Exception;
 }

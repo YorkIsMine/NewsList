@@ -1,6 +1,10 @@
 package com.yorkismine.newslist;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -9,6 +13,7 @@ import android.widget.Toast;
 
 import com.yorkismine.newslist.presenter.NewsPresenter;
 import com.yorkismine.newslist.presenter.Presenter;
+import com.yorkismine.newslist.presenter.PresenterViewModel;
 
 import java.io.File;
 import java.util.List;
@@ -16,7 +21,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements NewsView{
 
     private NewsAdapter adapter;
-    private Presenter presenter;
+    private PresenterViewModel presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +33,8 @@ public class MainActivity extends AppCompatActivity implements NewsView{
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        presenter = new NewsPresenter(this);
+        presenter = ViewModelProviders.of(this).get(PresenterViewModel.class);
+        presenter.setView(this);
 
         String key = "9145ee20b660406e9eea321aa4a0ee6c";
 
@@ -60,4 +66,16 @@ public class MainActivity extends AppCompatActivity implements NewsView{
         return getExternalCacheDir();
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putSerializable("KEY", presenter);
+        outState.putSerializable("KEY2", adapter);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        presenter = (PresenterViewModel) savedInstanceState.getSerializable("KEY");
+        adapter = (NewsAdapter) savedInstanceState.getSerializable("KEY2");
+    }
 }

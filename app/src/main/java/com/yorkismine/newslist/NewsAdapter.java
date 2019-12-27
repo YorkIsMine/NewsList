@@ -15,10 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsHolder> {
+public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsHolder>
+    implements Serializable {
 
     private List<Article> newsList = new ArrayList<>();
 
