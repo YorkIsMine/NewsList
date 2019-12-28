@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.widget.Toast;
 
 import com.yorkismine.newslist.presenter.NewsPresenter;
@@ -16,19 +17,22 @@ import com.yorkismine.newslist.presenter.Presenter;
 import com.yorkismine.newslist.presenter.PresenterViewModel;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NewsView{
 
     private NewsAdapter adapter;
     private PresenterViewModel presenter;
+    private List<Article> listOfArt = new ArrayList<>();
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerView);
         adapter = new NewsAdapter(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
@@ -67,15 +71,19 @@ public class MainActivity extends AppCompatActivity implements NewsView{
     }
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putSerializable("KEY", presenter);
-        outState.putSerializable("KEY2", adapter);
-        super.onSaveInstanceState(outState);
+    public void setListOfArticles(List<Article> articles) {
+        listOfArt.addAll(articles);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        presenter = (PresenterViewModel) savedInstanceState.getSerializable("KEY");
-        adapter = (NewsAdapter) savedInstanceState.getSerializable("KEY2");
+        super.onRestoreInstanceState(savedInstanceState);
+        listOfArt = savedInstanceState.getParcelableArrayList("KEY");
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("KEY", (ArrayList<? extends Parcelable>) listOfArt);
     }
 }

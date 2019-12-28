@@ -1,5 +1,7 @@
 package com.yorkismine.newslist.parser;
 
+import android.os.Parcel;
+
 import com.yorkismine.newslist.Article;
 
 import java.io.BufferedReader;

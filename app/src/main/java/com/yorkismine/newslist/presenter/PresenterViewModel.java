@@ -64,6 +64,8 @@ public class PresenterViewModel extends ViewModel implements Presenter{
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(list ->{
+                    System.out.println("CACHED NEWS\n\n\n\n\\n\n");
+                    view.setListOfArticles(list);
                     view.showProgress(list);
                 });
 
@@ -93,8 +95,11 @@ public class PresenterViewModel extends ViewModel implements Presenter{
                 .delay(2, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(list ->
-                        view.showProgress(list));
+                .subscribe(list ->{
+                    System.out.println("NEWS USA");
+                    view.setListOfArticles(list);
+                    view.showProgress(list);
+                });
 
         newsApi.getNewsRu()
                 .doOnNext(newsObject ->{
@@ -122,6 +127,8 @@ public class PresenterViewModel extends ViewModel implements Presenter{
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(list ->{
+                    System.out.println("NEWS RU");
+                    view.setListOfArticles(list);
                     view.showProgress(list);
                 });
 //        Observable.merge(ru, usa)
