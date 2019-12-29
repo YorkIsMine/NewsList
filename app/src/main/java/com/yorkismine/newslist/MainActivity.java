@@ -14,7 +14,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.yorkismine.newslist.presenter.NewsPresenter;
-import com.yorkismine.newslist.presenter.Presenter;
 import com.yorkismine.newslist.presenter.PresenterViewModel;
 
 import java.io.File;
