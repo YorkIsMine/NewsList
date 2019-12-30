@@ -65,7 +65,6 @@ public class PresenterViewModel extends ViewModel implements Presenter{
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(list ->{
                     System.out.println("CACHED NEWS\n\n\n\n\\n\n");
-                    view.setListOfArticles(list);
                     view.showProgress(list);
                 });
 
@@ -97,7 +96,6 @@ public class PresenterViewModel extends ViewModel implements Presenter{
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(list ->{
                     System.out.println("NEWS USA");
-                    view.setListOfArticles(list);
                     view.showProgress(list);
                 });
 
@@ -128,25 +126,7 @@ public class PresenterViewModel extends ViewModel implements Presenter{
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(list ->{
                     System.out.println("NEWS RU");
-                    view.setListOfArticles(list);
                     view.showProgress(list);
                 });
-//        Observable.merge(ru, usa)
-//                .filter(article -> {
-//
-//                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-//
-//                    Log.d("DATE", format.parse(format.format(new Date())).toString() + " 1");
-//                    Log.d("DATE", format.parse(article.getPublishedAt()) + " 2");
-//
-//                    return format.parse(format.format(new Date())).equals(format.parse(article.getPublishedAt()));
-//                })
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribeOn(Schedulers.io())
-//                .toList()
-//                .mergeWith(observable)
-//                .subscribe(list ->{
-//                    view.showProgress(list);
-//                });
     }
 }

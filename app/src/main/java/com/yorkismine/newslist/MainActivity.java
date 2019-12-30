@@ -25,28 +25,25 @@ public class MainActivity extends AppCompatActivity implements NewsView{
     private static final String NAME_OF_ACTIVITY = "MainActivity";
 
     private NewsAdapter adapter;
-    private PresenterViewModel presenter;
-    private ArrayList<Article> listOfArt = new ArrayList<>();
-    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
-        recyclerView = findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
         adapter = new NewsAdapter(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
         if (savedInstanceState != null){
-            listOfArt = savedInstanceState.getParcelableArrayList("123");
-            adapter.setData(listOfArt);
+            ArrayList<Article> articles =
+                    savedInstanceState.getParcelableArrayList("123");
+            adapter.setData(articles);
         }
 
-        presenter = ViewModelProviders.of(this).get(PresenterViewModel.class);
+        PresenterViewModel presenter =
+                ViewModelProviders.of(this).get(PresenterViewModel.class);
         presenter.setView(this);
 
         String key = "9145ee20b660406e9eea321aa4a0ee6c";
@@ -81,16 +78,9 @@ public class MainActivity extends AppCompatActivity implements NewsView{
     }
 
     @Override
-    public void setListOfArticles(List<Article> articles) {
-        listOfArt.addAll(articles);
-    }
-
-    @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        Log.d(NAME_OF_ACTIVITY, "onSaveInstanceState()");
-        Log.d(NAME_OF_ACTIVITY, listOfArt.size() + "");
         outState
-                .putParcelableArrayList("123", listOfArt);
+                .putParcelableArrayList("123", adapter.getNewsList());
         super.onSaveInstanceState(outState);
     }
 }
