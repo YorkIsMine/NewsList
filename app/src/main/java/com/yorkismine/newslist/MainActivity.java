@@ -8,9 +8,13 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.yorkismine.newslist.presenter.NewsPresenter;
@@ -26,10 +30,20 @@ public class MainActivity extends AppCompatActivity implements NewsView{
 
     private NewsAdapter adapter;
 
+    private String pasText;
+    private String logText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = getIntent();
+        pasText = intent.getStringExtra("pass");
+        logText = intent.getStringExtra("log");
+
+        Log.d("CHECKER", "value pas: " + pasText);
+        Log.d("CHECKER", "value log: " + logText);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         adapter = new NewsAdapter(this);
@@ -58,6 +72,33 @@ public class MainActivity extends AppCompatActivity implements NewsView{
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_main, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.exit_menu_btn){
+
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.putExtra("main_log", logText);
+            intent.putExtra("main_pass", pasText);
+
+            Log.d("CHECKER", "value pas: " + pasText);
+            Log.d("CHECKER", "value log: " + logText);
+
+            startActivity(intent);
+
+            finish();
+        }
+
+        return true;
+    }
+
+    @Override
     public void showProgress(List<Article> articles) {
         if (articles.size() != 0 || articles != null) {
             adapter.setData(articles);
@@ -83,4 +124,5 @@ public class MainActivity extends AppCompatActivity implements NewsView{
                 .putParcelableArrayList("123", adapter.getNewsList());
         super.onSaveInstanceState(outState);
     }
+
 }
