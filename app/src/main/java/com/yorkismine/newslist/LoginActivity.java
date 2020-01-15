@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            if (loginText.trim().length() <= 6 || passwordText.trim().length() <= 6) {
+            if (loginText.trim().length() < 6 || passwordText.trim().length() < 6) {
                 Toast.makeText(this, "few digits", Toast.LENGTH_LONG)
                         .show();
                 return;
@@ -68,8 +68,8 @@ public class LoginActivity extends AppCompatActivity {
             Log.d("CHECKER", "logACT: log: " + loginText);
             Log.d("CHECKER", "logACT: pas: " + passwordText);
 
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-            finish();
         });
     }
 

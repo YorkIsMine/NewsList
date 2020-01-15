@@ -38,9 +38,12 @@ public class MainActivity extends AppCompatActivity implements NewsView{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         Intent intent = getIntent();
         pasText = intent.getStringExtra("pass");
         logText = intent.getStringExtra("log");
+
+        getSupportActionBar().setTitle(logText);
 
         Log.d("CHECKER", "value pas: " + pasText);
         Log.d("CHECKER", "value log: " + logText);
@@ -90,9 +93,9 @@ public class MainActivity extends AppCompatActivity implements NewsView{
             Log.d("CHECKER", "value pas: " + pasText);
             Log.d("CHECKER", "value log: " + logText);
 
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
 
-            finish();
         }
 
         return true;
