@@ -1,10 +1,10 @@
 package com.yorkismine.newslist;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Paint;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,6 +13,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class LoginActivity extends AppCompatActivity {
+    public static final String PREF_LOGIN = "edit_login";
+    public static final String PREF_PASSWORD = "edit_password";
+
+    private SharedPreferences pref;
 
     private EditText login_et;
     private EditText password_et;
@@ -32,16 +36,11 @@ public class LoginActivity extends AppCompatActivity {
         password_et = findViewById(R.id.password_et);
         loginBtn = findViewById(R.id.login_btn);
 
-        Intent fromMainIntent = getIntent();
+        pref = getPreferences(Context.MODE_PRIVATE);
 
-        if (fromMainIntent.getStringExtra("main_log") != null) {
-            Log.d("CHECKER", "Done1IF");
-            login_et.setText(fromMainIntent.getStringExtra("main_log"));
-        }
-
-        if (fromMainIntent.getStringExtra("main_pass") != null) {
-            Log.d("CHECKER", "Done2IF");
-            password_et.setText(fromMainIntent.getStringExtra("main_pass"));
+        if (pref.contains(PREF_LOGIN) && pref.contains(PREF_PASSWORD)){
+            login_et.setText(pref.getString(PREF_LOGIN, ""));
+            password_et.setText(pref.getString(PREF_PASSWORD, ""));
         }
 
 
@@ -61,6 +60,11 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString(PREF_LOGIN, loginText);
+            editor.putString(PREF_PASSWORD, passwordText);
+            editor.apply();
+
             Intent intent = new Intent(this, MainActivity.class);
             intent.putExtra("pass", passwordText);
             intent.putExtra("log", loginText);
@@ -68,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
             Log.d("CHECKER", "logACT: log: " + loginText);
             Log.d("CHECKER", "logACT: pas: " + passwordText);
 
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         });
     }

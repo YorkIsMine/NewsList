@@ -85,10 +85,7 @@ public class MainActivity extends AppCompatActivity implements NewsView{
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.exit_menu_btn){
-
             Intent intent = new Intent(this, LoginActivity.class);
-            intent.putExtra("main_log", logText);
-            intent.putExtra("main_pass", pasText);
 
             Log.d("CHECKER", "value pas: " + pasText);
             Log.d("CHECKER", "value log: " + logText);
@@ -100,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements NewsView{
 
         return true;
     }
+
 
     @Override
     public void showProgress(List<Article> articles) {
