@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -29,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements NewsView{
     private static final String NAME_OF_ACTIVITY = "MainActivity";
 
     private NewsAdapter adapter;
-
+    private SharedPreferences pref;
     private String pasText;
     private String logText;
 
@@ -38,10 +40,33 @@ public class MainActivity extends AppCompatActivity implements NewsView{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        pref = getPreferences(Context.MODE_PRIVATE);
 
         Intent intent = getIntent();
-        pasText = intent.getStringExtra("pass");
-        logText = intent.getStringExtra("log");
+        if (intent.getStringExtra("pass") != null &&
+        intent.getStringExtra("log") != null){
+            pasText = intent.getStringExtra("pass");
+            logText = intent.getStringExtra("log");
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString(LoginActivity.PREF_LOGIN, logText);
+            editor.putString(LoginActivity.PREF_PASSWORD, pasText);
+            editor.apply();
+        }
+
+        if (pref.contains(LoginActivity.PREF_LOGIN) &&
+                pref.contains(LoginActivity.PREF_PASSWORD)){
+
+            pasText = pref.getString(LoginActivity.PREF_PASSWORD, "");
+            logText = pref.getString(LoginActivity.PREF_LOGIN, "");
+
+        }else{
+            Intent toLogin = new Intent(this, LoginActivity.class);
+            startActivity(toLogin);
+            finish();
+        }
+
+
+
 
         getSupportActionBar().setTitle(logText);
 
