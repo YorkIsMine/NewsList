@@ -30,7 +30,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class PresenterViewModel extends ViewModel implements Presenter{
+public class PresenterViewModel extends ViewModel implements Presenter {
     private NewsView view;
 
     public void setView(NewsView view) {
@@ -60,15 +60,10 @@ public class PresenterViewModel extends ViewModel implements Presenter{
         Parser parser = new CsvParser();
 
 
-        Observable<List<Article>> cacheNews = Observable
-                .fromIterable(parser.parse(new File(view.getNameExternalCacheDir(), "news.csv")))
-                .toList().toObservable();
-
-
         Observable<List<Article>> newsRu = newsApi.getNewsRu()
-                .doOnNext(newsObject ->{
+                .doOnNext(newsObject -> {
                     int i = 0;
-                    for (Article article : newsObject.getArticles()){
+                    for (Article article : newsObject.getArticles()) {
                         Log.d("ELEM", article.toString() + " RU " + i++);
                     }
                 }).map(NewsObject::getArticles)
@@ -83,17 +78,16 @@ public class PresenterViewModel extends ViewModel implements Presenter{
                     return format.parse(format.format(new Date())).equals(format.parse(article.getPublishedAt()));
                 })
                 .take(5)
-                .map(art ->{
+                .map(art -> {
                     art.setTitle("RU " + art.getTitle());
                     return art;
                 }).toList()
                 .delay(5, TimeUnit.SECONDS).toObservable();
 
-
-        Observable.merge(Observable.merge(cacheNews, newsRu), newsApi.getNewsUSA()
-                .doOnNext(newsObject ->{
+        Observable<List<Article>> newsUsa = newsApi.getNewsUSA()
+                .doOnNext(newsObject -> {
                     int i = 0;
-                    for (Article article : newsObject.getArticles()){
+                    for (Article article : newsObject.getArticles()) {
                         Log.d("ELEM", article.toString() + " USA " + i++);
                     }
                 }).map(NewsObject::getArticles)
@@ -109,13 +103,32 @@ public class PresenterViewModel extends ViewModel implements Presenter{
                 })
                 .take(5)
                 .map(art -> {
-                    art.setTitle("USA " + art.getTitle());
+                    art.setTitle("RU " + art.getTitle());
                     return art;
                 }).toList()
-                .delay(2, TimeUnit.SECONDS).toObservable())
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(list -> view.showProgress(list));
+                .delay(2, TimeUnit.SECONDS).toObservable();
+
+        Observable<List<Article>> mergedNews = Observable.merge(newsRu, newsUsa);
+
+        File file = new File(view.getNameExternalCacheDir(), "news.csv");
+
+        if (file.exists()) {
+            Observable<List<Article>> cacheNews = Observable
+                    .fromIterable(parser.parse(file))
+                    .toList().toObservable();
+
+            Observable.merge(mergedNews, cacheNews)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(list -> view.showProgress(list));
+
+        } else {
+            mergedNews
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(list -> view.showProgress(list));
+
+        }
 
 
     }
