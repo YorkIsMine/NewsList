@@ -30,7 +30,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class PresenterViewModel extends ViewModel implements Presenter{
+public class PresenterViewModel extends ViewModel implements Presenter {
     private NewsView view;
 
     public void setView(NewsView view) {
@@ -58,22 +58,36 @@ public class PresenterViewModel extends ViewModel implements Presenter{
 
         NewsApi newsApi = retrofit.create(NewsApi.class);
         Parser parser = new CsvParser();
-        Observable
-                .fromIterable(parser.parse(new File(view.getNameExternalCacheDir(), "news.csv")))
-                .toList()
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(list ->{
-                    System.out.println("CACHED NEWS\n\n\n\n\\n\n");
-                    view.setListOfArticles(list);
-                    view.showProgress(list);
-                });
 
 
-        newsApi.getNewsUSA()
-                .doOnNext(newsObject ->{
+        Observable<List<Article>> newsRu = newsApi.getNewsRu()
+                .doOnNext(newsObject -> {
                     int i = 0;
-                    for (Article article : newsObject.getArticles()){
+                    for (Article article : newsObject.getArticles()) {
+                        Log.d("ELEM", article.toString() + " RU " + i++);
+                    }
+                }).map(NewsObject::getArticles)
+                .flatMapIterable(articles -> articles)
+                .filter(article -> {
+
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+
+                    Log.d("DATE", format.parse(format.format(new Date())).toString() + " 1");
+                    Log.d("DATE", format.parse(article.getPublishedAt()) + " 2");
+
+                    return format.parse(format.format(new Date())).equals(format.parse(article.getPublishedAt()));
+                })
+                .take(5)
+                .map(art -> {
+                    art.setTitle("RU " + art.getTitle());
+                    return art;
+                }).toList()
+                .delay(5, TimeUnit.SECONDS).toObservable();
+
+        Observable<List<Article>> newsUsa = newsApi.getNewsUSA()
+                .doOnNext(newsObject -> {
+                    int i = 0;
+                    for (Article article : newsObject.getArticles()) {
                         Log.d("ELEM", article.toString() + " USA " + i++);
                     }
                 }).map(NewsObject::getArticles)
@@ -89,64 +103,33 @@ public class PresenterViewModel extends ViewModel implements Presenter{
                 })
                 .take(5)
                 .map(art -> {
-                    art.setTitle("USA " + art.getTitle());
-                    return art;
-                }).toList()
-                .delay(2, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(list ->{
-                    System.out.println("NEWS USA");
-                    view.setListOfArticles(list);
-                    view.showProgress(list);
-                });
-
-        newsApi.getNewsRu()
-                .doOnNext(newsObject ->{
-                    int i = 0;
-                    for (Article article : newsObject.getArticles()){
-                        Log.d("ELEM", article.toString() + " RU " + i++);
-                    }
-                }).map(NewsObject::getArticles)
-                .flatMapIterable(articles -> articles)
-                .filter(article -> {
-
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-
-                    Log.d("DATE", format.parse(format.format(new Date())).toString() + " 1");
-                    Log.d("DATE", format.parse(article.getPublishedAt()) + " 2");
-
-                    return format.parse(format.format(new Date())).equals(format.parse(article.getPublishedAt()));
-                })
-                .take(5)
-                .map(art ->{
                     art.setTitle("RU " + art.getTitle());
                     return art;
                 }).toList()
-                .delay(5, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(list ->{
-                    System.out.println("NEWS RU");
-                    view.setListOfArticles(list);
-                    view.showProgress(list);
-                });
-//        Observable.merge(ru, usa)
-//                .filter(article -> {
-//
-//                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-//
-//                    Log.d("DATE", format.parse(format.format(new Date())).toString() + " 1");
-//                    Log.d("DATE", format.parse(article.getPublishedAt()) + " 2");
-//
-//                    return format.parse(format.format(new Date())).equals(format.parse(article.getPublishedAt()));
-//                })
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribeOn(Schedulers.io())
-//                .toList()
-//                .mergeWith(observable)
-//                .subscribe(list ->{
-//                    view.showProgress(list);
-//                });
+                .delay(2, TimeUnit.SECONDS).toObservable();
+
+        Observable<List<Article>> mergedNews = Observable.merge(newsRu, newsUsa);
+
+        File file = new File(view.getNameExternalCacheDir(), "news.csv");
+
+        if (file.exists()) {
+            Observable<List<Article>> cacheNews = Observable
+                    .fromIterable(parser.parse(file))
+                    .toList().toObservable();
+
+            Observable.merge(mergedNews, cacheNews)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(list -> view.showProgress(list));
+
+        } else {
+            mergedNews
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(list -> view.showProgress(list));
+
+        }
+
+
     }
 }

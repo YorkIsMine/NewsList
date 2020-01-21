@@ -20,12 +20,16 @@ import java.util.List;
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsHolder>
     implements Serializable {
 
-    private List<Article> newsList = new ArrayList<>();
+    private ArrayList<Article> newsList = new ArrayList<>();
 
     private Context context;
 
     public NewsAdapter(Context context) {
         this.context = context;
+    }
+
+    public ArrayList<Article> getNewsList() {
+        return newsList;
     }
 
     @NonNull

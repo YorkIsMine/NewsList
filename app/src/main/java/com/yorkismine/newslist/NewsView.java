@@ -7,5 +7,4 @@ public interface NewsView {
     void showProgress(List<Article> articles);
     void showError(Throwable t);
     File getNameExternalCacheDir();
-    void setListOfArticles(List<Article> articles);
 }
