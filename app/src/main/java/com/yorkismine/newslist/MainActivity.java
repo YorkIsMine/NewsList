@@ -26,9 +26,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NewsView{
+public class MainActivity extends AppCompatActivity implements NewsView {
 
     private static final String NAME_OF_ACTIVITY = "MainActivity";
+    private static final String PARCELABLE_LIST = "ParcelableList";
 
     private NewsAdapter adapter;
     private SharedPreferences pref;
@@ -43,29 +44,21 @@ public class MainActivity extends AppCompatActivity implements NewsView{
         pref = getPreferences(Context.MODE_PRIVATE);
 
         Intent intent = getIntent();
-        if (intent.getStringExtra("pass") != null &&
-        intent.getStringExtra("log") != null){
-            pasText = intent.getStringExtra("pass");
+        if (intent.getStringExtra("log") != null) {
             logText = intent.getStringExtra("log");
             SharedPreferences.Editor editor = pref.edit();
             editor.putString(LoginActivity.PREF_LOGIN, logText);
-            editor.putString(LoginActivity.PREF_PASSWORD, pasText);
             editor.apply();
         }
 
-        if (pref.contains(LoginActivity.PREF_LOGIN) &&
-                pref.contains(LoginActivity.PREF_PASSWORD)){
-
-            pasText = pref.getString(LoginActivity.PREF_PASSWORD, "");
+        if (pref.contains(LoginActivity.PREF_LOGIN)){
             logText = pref.getString(LoginActivity.PREF_LOGIN, "");
 
-        }else{
+        } else{
             Intent toLogin = new Intent(this, LoginActivity.class);
+            toLogin.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(toLogin);
-            finish();
         }
-
-
 
 
         getSupportActionBar().setTitle(logText);
@@ -78,9 +71,9 @@ public class MainActivity extends AppCompatActivity implements NewsView{
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             ArrayList<Article> articles =
-                    savedInstanceState.getParcelableArrayList("123");
+                    savedInstanceState.getParcelableArrayList(PARCELABLE_LIST);
             adapter.setData(articles);
         }
 
@@ -109,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements NewsView{
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.exit_menu_btn){
+        if (item.getItemId() == R.id.exit_menu_btn) {
             Intent intent = new Intent(this, LoginActivity.class);
 
             Log.d("CHECKER", "value pas: " + pasText);
@@ -147,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements NewsView{
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState
-                .putParcelableArrayList("123", adapter.getNewsList());
+                .putParcelableArrayList(PARCELABLE_LIST, adapter.getNewsList());
         super.onSaveInstanceState(outState);
     }
 

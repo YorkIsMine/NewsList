@@ -52,7 +52,6 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             Intent intent = new Intent(this, MainActivity.class);
-            intent.putExtra("pass", passwordText);
             intent.putExtra("log", loginText);
 
             Log.d("CHECKER", "logACT: log: " + loginText);
